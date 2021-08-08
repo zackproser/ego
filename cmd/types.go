@@ -1,8 +1,13 @@
 package cmd
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/google/go-github/v37/github"
+)
 
 type Options struct {
+	GithubClient   *github.Client
 	GithubUsername string
 }
 

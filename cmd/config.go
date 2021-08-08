@@ -52,6 +52,8 @@ func ReadConfigFile(opts *Options) (*Options, error) {
 
 	readGithubTokenFromEnv()
 
+	getClient(opts)
+
 	return opts, nil
 }
 
