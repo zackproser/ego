@@ -17,6 +17,9 @@ var rootCmd = &cobra.Command{
 	Short: "tracker",
 	Long:  "tracker",
 	Run: func(cmd *cobra.Command, args []string) {
+
+		handleConfigCreation()
+
 		opts, err := initConfig()
 		if err != nil {
 			log.Error(err)
