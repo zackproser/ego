@@ -1,35 +1,40 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/pterm/pterm"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-var AppName = "Tracker"
+var AppName = "Ego"
 
 var log = logrus.New()
 
 var rootCmd = &cobra.Command{
-	Use:   "tracker",
-	Short: "tracker",
-	Long:  "tracker",
+	Use:   "ego",
+	Short: "ego",
+	Long:  "ego",
 	Run: func(cmd *cobra.Command, args []string) {
 
 		handleConfigCreation()
 
-		opts, err := initConfig()
-		if err != nil {
-			log.Error(err)
-		}
+		/*
+			_, err := initConfig()
+			if err != nil {
+				log.Error(err)
+			} */
 
-		startSpinner()
-		renderUserPRs(opts)
-		stopSpinner()
+		/*
+			startSpinner()
+			renderUserPRs(opts)
+			stopSpinner()
+		*/
 
 	},
+}
+
+func init() {
+	log.SetLevel(logrus.DebugLevel)
 }
 
 func renderUserPRs(opts *Options) {
@@ -66,12 +71,7 @@ func initConfig() (*Options, error) {
 	return opts, nil
 }
 
-func persistentPreRun(cmd *cobra.Command, args []string) {
-	fmt.Println("persistentPreRun")
-}
-
 func Execute() {
-	fmt.Println("Execute")
 	if err := rootCmd.Execute(); err != nil {
 		log.Debug(err)
 		return

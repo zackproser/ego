@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/zackproser/tracker/cmd"
+	"github.com/zackproser/ego/cmd"
 )
 
 func main() {

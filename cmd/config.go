@@ -25,7 +25,11 @@ func getConfigDir() (string, error) {
 }
 
 func getConfigName() string {
-	return fmt.Sprintf("%s.json", strings.ToLower(AppName))
+	return fmt.Sprintf("%s", strings.ToLower(AppName))
+}
+
+func getConfigExt() string {
+	return ".json"
 }
 
 func getConfigPath() (string, error) {
@@ -37,20 +41,24 @@ func getConfigPath() (string, error) {
 		return "", dirErr
 	}
 
-	fileName := getConfigName()
+	fileName := fmt.Sprintf("%s%s", getConfigName(), getConfigExt())
 
+	fmt.Println(filepath.Join(dir, fileName))
 	return filepath.Join(dir, fileName), nil
 }
 
 func ReadConfigFile(opts *Options) (*Options, error) {
-
-	viper.SetConfigType("json")
-	viper.SetConfigName(getConfigName())
-
-	configPath, err := getConfigDir()
+	configPath, err := getConfigPath()
 	if err != nil {
 		return opts, err
 	}
+
+	viper.AddConfigPath(configPath)
+
+	log.WithFields(logrus.Fields{
+		"path": configPath,
+	}).Debug("ReadConfigFile looking for config at path")
+
 	viper.AddConfigPath(configPath)
 
 	viper.AutomaticEnv()
@@ -59,10 +67,9 @@ func ReadConfigFile(opts *Options) (*Options, error) {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			fmt.Println("Could not find config file for reading")
 			return opts, err
-		} else {
-			fmt.Println("Found and read config")
-			fmt.Printf("GithubUsername: %s\n", viper.Get("GithubUsername"))
 		}
+		fmt.Println("Found and read config")
+		fmt.Printf("GithubUsername: %s\n", viper.Get("GithubUsername"))
 	}
 
 	loadConfigIntoOptions(opts)
@@ -89,29 +96,37 @@ func loadConfigIntoOptions(opts *Options) {
 
 func configFileExists() bool {
 	path, err := getConfigPath()
-	fmt.Println("configFileExists: " + path)
 	if err != nil {
 		log.WithFields(logrus.Fields{
 			"Error": err,
 		}).Debug("Could not determine path for checking if existing config file present")
 	}
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		fmt.Println("it doesnt")
+		log.Debug("Ego did not find a previously existing config file")
+		log.Debug("Ego will now attempt to create one")
 		return false
 	}
+	log.WithFields(logrus.Fields{
+		"Path": path,
+	}).Debug("Ego found existing config file at path")
 	return true
 }
 
 func handleConfigCreation() {
 	if !configFileExists() {
-		fmt.Println("config file does not exist!")
-		runSetup()
+		err := runSetup()
+		if err != nil {
+			log.WithFields(logrus.Fields{
+				"Error": err,
+			}).Debug("Error running config setup")
+		} else {
+			log.Debug("Successfully setup new configuration")
+		}
 	}
 }
 
-func runSetup() {
+func runSetup() error {
 
-	fmt.Println("runSetup")
 	var qs = []*survey.Question{
 		{
 			Name:     "GithubUsername",
@@ -124,11 +139,53 @@ func runSetup() {
 		GithubUsername string
 	}{}
 
-	err := survey.Ask(qs, &answers)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
+	surveyErr := survey.Ask(qs, &answers)
+	if surveyErr != nil {
+		return surveyErr
 	}
 
-	fmt.Printf("surveyed: %s\n", answers.GithubUsername)
+	dir, dirErr := getConfigDir()
+	if dirErr != nil {
+		return dirErr
+	}
+
+	viper.AddConfigPath(dir)
+	viper.SetConfigName(getConfigName())
+	viper.SetConfigType(getConfigExt())
+
+	configPath, configPathErr := getConfigPath()
+	if configPathErr != nil {
+		return configPathErr
+	}
+
+	viper.Set("GithubUsername", answers.GithubUsername)
+
+	_, existErr := os.Stat(configPath)
+	if !os.IsExist(existErr) {
+
+		log.WithFields(logrus.Fields{
+			"path": configPath,
+		}).Debug("Attempting to write config file to path")
+
+		if createDirErr := os.MkdirAll(dir, 0755); createDirErr != nil {
+			return createDirErr
+		}
+
+		if _, createErr := os.OpenFile(configPath, os.O_RDWR|os.O_CREATE, 0755); createErr != nil {
+			return createErr
+		}
+		log.WithFields(logrus.Fields{
+			"path": configPath,
+		}).Debug("Created new config file at path")
+	}
+
+	configWriteErr := viper.WriteConfigAs(configPath)
+
+	if configWriteErr != nil {
+		return configWriteErr
+	}
+	log.WithFields(logrus.Fields{
+		"path": configPath,
+	}).Debug("Successfully wrote config file to path")
+	return nil
 }
