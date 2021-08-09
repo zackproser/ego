@@ -1,6 +1,10 @@
 package cmd
 
 import (
+	"fmt"
+	"time"
+
+	"github.com/google/go-github/v37/github"
 	"github.com/pterm/pterm"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -15,40 +19,59 @@ var rootCmd = &cobra.Command{
 	Short: "ego",
 	Long:  "ego",
 	Run: func(cmd *cobra.Command, args []string) {
+		renderMarquee()
 
 		handleConfigCreation()
 
-		/*
-			_, err := initConfig()
-			if err != nil {
-				log.Error(err)
-			} */
+		opts, err := initConfig()
+		if err != nil {
+			log.Error(err)
+		}
 
-		/*
-			startSpinner()
-			renderUserPRs(opts)
-			stopSpinner()
-		*/
+		opts = instantiateGithubClient(opts)
 
+		fmt.Printf("Opts: %+v\n", opts)
+		//startSpinner()
+		renderUserPRs(opts)
+		//stopSpinner()
 	},
+}
+
+func renderMarquee() {
+	egoLogo, _ := pterm.DefaultBigText.WithLetters(
+		pterm.NewLettersFromStringWithStyle("E", pterm.NewStyle(pterm.FgCyan)),
+		pterm.NewLettersFromStringWithStyle("GO", pterm.NewStyle(pterm.FgLightMagenta))).
+		Srender()
+
+	pterm.DefaultCenter.Print(egoLogo)
+
+	pterm.DefaultCenter.Print(pterm.DefaultBasicText.Sprint("Work stats tracker"))
+
+	pterm.DefaultCenter.Print(pterm.DefaultHeader.WithFullWidth().WithBackgroundStyle(pterm.NewStyle(pterm.BgLightGreen)).WithMargin(10).Sprint("By Zack Proser"))
+
+	time.Sleep(3 * time.Second)
+
+	// Clear the screen
+	print("\033[H\033[2J")
+
 }
 
 func init() {
 	log.SetLevel(logrus.DebugLevel)
 }
 
+func isLastMonth(i *github.Issue) bool {
+	month := i.CreatedAt.Month()
+	if month == time.July {
+		return true
+	}
+	return false
+}
+
 func renderUserPRs(opts *Options) {
 	prs := getUserPRs(opts)
-	pterm.DefaultHeader.Println("Pull Requests")
-	var items []pterm.BulletListItem
-	for _, prUrl := range prs {
-		item := pterm.BulletListItem{
-			Level: 0,
-			Text:  prUrl,
-		}
-		items = append(items, item)
-	}
-	pterm.DefaultBulletList.WithItems(items).Render()
+
+	renderUI(prs)
 }
 
 func stopSpinner() {

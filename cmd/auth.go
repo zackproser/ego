@@ -8,13 +8,18 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func getClient(opts *Options) *Options {
+func getClient() *github.Client {
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: viper.GetString("GITHUB_OAUTH_TOKEN")},
 	)
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
+	return client
+}
+
+func instantiateGithubClient(opts *Options) *Options {
+	client := getClient()
 	opts.GithubClient = client
 	return opts
 }

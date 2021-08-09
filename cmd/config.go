@@ -29,7 +29,7 @@ func getConfigName() string {
 }
 
 func getConfigExt() string {
-	return ".json"
+	return "json"
 }
 
 func getConfigPath() (string, error) {
@@ -41,25 +41,26 @@ func getConfigPath() (string, error) {
 		return "", dirErr
 	}
 
-	fileName := fmt.Sprintf("%s%s", getConfigName(), getConfigExt())
+	// Concatenate the filename and extension (.json) to get the second half of the full path
+	fileName := fmt.Sprintf("%s.%s", getConfigName(), getConfigExt())
 
 	fmt.Println(filepath.Join(dir, fileName))
 	return filepath.Join(dir, fileName), nil
 }
 
 func ReadConfigFile(opts *Options) (*Options, error) {
-	configPath, err := getConfigPath()
+	configDir, err := getConfigDir()
 	if err != nil {
 		return opts, err
 	}
 
-	viper.AddConfigPath(configPath)
+	viper.AddConfigPath(configDir)
+	viper.SetConfigName(getConfigName())
+	viper.SetConfigType("json")
 
 	log.WithFields(logrus.Fields{
-		"path": configPath,
-	}).Debug("ReadConfigFile looking for config at path")
-
-	viper.AddConfigPath(configPath)
+		"dir": configDir,
+	}).Debug("ReadConfigFile looking for config in directory")
 
 	viper.AutomaticEnv()
 
@@ -69,14 +70,14 @@ func ReadConfigFile(opts *Options) (*Options, error) {
 			return opts, err
 		}
 		fmt.Println("Found and read config")
-		fmt.Printf("GithubUsername: %s\n", viper.Get("GithubUsername"))
+		fmt.Printf("All settings: %+v\n", viper.AllSettings())
 	}
 
 	loadConfigIntoOptions(opts)
 
 	readGithubTokenFromEnv()
 
-	getClient(opts)
+	instantiateGithubClient(opts)
 
 	return opts, nil
 }
@@ -91,7 +92,7 @@ func readGithubTokenFromEnv() (string, error) {
 // loadConfigIntoOptions translates values read from the config file into Options
 // consumable by the cmd package
 func loadConfigIntoOptions(opts *Options) {
-	opts.GithubUsername = viper.GetString("GithubUsername")
+	opts.GithubUsername = viper.GetString("githubusername")
 }
 
 func configFileExists() bool {
