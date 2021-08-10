@@ -19,7 +19,7 @@ var rootCmd = &cobra.Command{
 	Short: "ego",
 	Long:  "ego",
 	Run: func(cmd *cobra.Command, args []string) {
-		renderMarquee()
+		//renderMarquee()
 
 		handleConfigCreation()
 

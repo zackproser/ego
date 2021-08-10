@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"fmt"
+	"strings"
+
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
 	"github.com/google/go-github/v37/github"
@@ -14,16 +17,10 @@ func renderUI(issues []*github.Issue) {
 
 	header := widgets.NewParagraph()
 	header.Text = "Press q to quit, Press h or l to switch tabs"
-	header.SetRect(0, 0, 50, 1)
+	header.SetRect(0, 0, 5, 10)
 	header.Border = false
 	header.TextStyle.Bg = ui.ColorBlue
 	header.TextStyle.Fg = ui.ColorWhite
-
-	p2 := widgets.NewParagraph()
-	p2.Text = "Press q to quit\nPress h or l to switch tabs\n"
-	p2.Title = "Keys"
-	p2.SetRect(5, 5, 40, 15)
-	p2.BorderStyle.Fg = ui.ColorYellow
 
 	bc := widgets.NewBarChart()
 	bc.Title = "Wakka Chart"
@@ -33,41 +30,39 @@ func renderUI(issues []*github.Issue) {
 
 	table1 := widgets.NewTable()
 	table1.Rows = [][]string{
-		[]string{"header1", "header2", "header3"},
-		[]string{"你好吗", "Go-lang is so cool", "Im working on Ruby"},
-		[]string{"2016", "10", "11"},
+		[]string{"Repo", "PR Title", "URL"},
+		[]string{issues[0].GetRepository().GetName(), issues[0].GetTitle(), issues[0].GetHTMLURL()},
+		[]string{issues[1].GetRepository().GetName(), issues[1].GetTitle(), issues[1].GetHTMLURL()},
+		[]string{issues[2].GetRepository().GetName(), issues[2].GetTitle(), issues[2].GetHTMLURL()},
+		[]string{issues[3].GetRepository().GetName(), issues[3].GetTitle(), issues[3].GetHTMLURL()},
 	}
 	table1.TextStyle = ui.NewStyle(ui.ColorWhite)
-	table1.SetRect(5, 5, 50, 10)
+	table1.SetRect(0, 0, 60, 10)
+	table1.RowSeparator = true
+	table1.FillRow = true
+
+	termWidth, termHeight := ui.TerminalDimensions()
 
 	tabpane := widgets.NewTabPane("Pull Requests", "Issues", "Commits")
-	tabpane.SetRect(0, 1, 50, 4)
-	tabpane.Border = true
+	tabpane.SetRect(0, 0, 50, 1)
+	tabpane.Border = false
 
-	/*	renderTab := func() {
-			switch tabpane.ActiveTabIndex {
-			case 0:
-				ui.Render(p2)
-			case 1:
-				ui.Render(bc)
-			case 2:
-				ui.Render(header, tabpane, table1)
-			}
+	renderTab := func() {
+		switch tabpane.ActiveTabIndex {
+		case 0:
+			ui.Render(table1)
+		case 1:
+			ui.Render(table1)
 		}
-
-		ui.Render(header, tabpane, p2) */
+	}
 
 	grid := ui.NewGrid()
-	termWidth, termHeight := ui.TerminalDimensions()
 	grid.SetRect(0, 0, termWidth, termHeight)
 
 	grid.Set(
 		ui.NewRow(1.0/2,
-			ui.NewCol(1.0/2, p2),
-			ui.NewCol(1.0/2, bc),
-		),
-		ui.NewRow(1.0/2,
-			ui.NewCol(1.0/2, table1),
+			ui.NewCol(.9/3, tabpane),
+			ui.NewCol(1.2/3, table1),
 		),
 	)
 
@@ -77,21 +72,50 @@ func renderUI(issues []*github.Issue) {
 
 	for {
 		e := <-uiEvents
-		switch e.ID {
-		case "q", "<C-c>":
+		switch key := e.ID; key {
+		case "<Esc>", "<C-c>":
 			return
-			/*case "h":
-				tabpane.FocusLeft()
-				ui.Clear()
-				ui.Render(header, tabpane)
-				renderTab()
-			case "l":
-				tabpane.FocusRight()
-				ui.Clear()
-				ui.Render(header, tabpane)
-				renderTab()*/
+		case "<Left>":
+			tabpane.FocusLeft()
+			ui.Clear()
+			ui.Render(header, tabpane)
+			renderTab()
+		case "<Right>":
+			tabpane.FocusRight()
+			ui.Clear()
+			ui.Render(header, tabpane)
+			renderTab()
+		case "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z":
+			fmt.Println("Key is: " + key)
+			filteredIssues := filterIssuesByTypeaheadSearch(issues, key)
+			rowsMap := [][]string{}
+			for i, _ := range filteredIssues {
+				m := []string{}
+				m = append(m, filteredIssues[i].GetRepository().GetName(), filteredIssues[i].GetTitle(), filteredIssues[i].GetHTMLURL())
+				rowsMap = append(rowsMap, m)
+			}
+			if len(rowsMap) == 0 {
+				rowsMap = [][]string{
+					[]string{"No", "Results", "Found"},
+				}
+			}
+			table1.Rows = rowsMap
+			ui.Clear()
+			ui.Render(header, tabpane)
+			renderTab()
+		}
+
+	}
+}
+
+func filterIssuesByTypeaheadSearch(issues []*github.Issue, key string) []*github.Issue {
+	var filteredIssues []*github.Issue
+	for _, issue := range issues {
+		if strings.HasPrefix(strings.ToLower(issue.GetTitle()), strings.ToLower(key)) {
+			filteredIssues = append(filteredIssues, issue)
 		}
 	}
+	return filteredIssues
 }
 
 func filterLastMonthsPRs(issues []*github.Issue) {
