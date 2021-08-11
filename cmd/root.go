@@ -27,7 +27,8 @@ var rootCmd = &cobra.Command{
 		opts = instantiateGithubClient(opts)
 
 		//startSpinner()
-		renderUserPRs(opts)
+		//renderUserPRs(opts)
+		dummyStatsOutput(opts)
 		//stopSpinner()
 	},
 }

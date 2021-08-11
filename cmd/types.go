@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/google/go-github/v37/github"
 )
 
@@ -26,7 +27,8 @@ type SetupAnswers struct {
 }
 
 type Tally struct {
-	repos []*git.Repository
+	repos   []*git.Repository
+	commits []*object.Commit
 }
 
 // Custom errors

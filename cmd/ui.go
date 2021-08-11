@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/gdamore/tcell/v2"
@@ -10,11 +9,22 @@ import (
 	"github.com/rivo/tview"
 )
 
+func dummyStatsOutput(opts *Options) {
+	fmt.Printf("Total Local Repos: %+v\n", opts.Tally.GetRepoCount())
+
+	authorMap := opts.Tally.GetAuthorMap(10)
+	fmt.Println("Local Repo Author Map:")
+	for k, v := range authorMap {
+		fmt.Printf("%s: %v\n", k, v)
+	}
+
+	commitsByZack := opts.Tally.FilterCommitsByAuthorName("Zack Proser")
+	for _, commit := range commitsByZack {
+		fmt.Printf("I wrote: %s", commit.Message)
+	}
+}
+
 func renderUI(issues []*github.Issue, opts *Options) {
-
-	fmt.Printf("GOT COUNT OF REPOS: %+v\n", opts.Tally.GetRepoCount())
-	os.Exit(1)
-
 	app := tview.NewApplication()
 	table := tview.NewTable().
 		SetBorders(true)
