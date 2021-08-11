@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/google/go-github/v37/github"
@@ -30,7 +29,6 @@ var rootCmd = &cobra.Command{
 
 		opts = instantiateGithubClient(opts)
 
-		fmt.Printf("Opts: %+v\n", opts)
 		//startSpinner()
 		renderUserPRs(opts)
 		//stopSpinner()

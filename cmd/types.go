@@ -19,6 +19,11 @@ type Configuration struct {
 	GithubUsername string
 }
 
+type SetupAnswers struct {
+	GithubUsername string
+	GitRoot        string
+}
+
 type GithubTokenEnvVarUnsetErr struct{}
 
 func (e GithubTokenEnvVarUnsetErr) Error() string {

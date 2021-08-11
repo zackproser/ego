@@ -10,6 +10,8 @@ require (
 	github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e // indirect
 	github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
+	github.com/gdamore/tcell v1.4.0 // indirect
+	github.com/gdamore/tcell/v2 v2.4.0 // indirect
 	github.com/gizak/termui v3.1.0+incompatible // indirect
 	github.com/gizak/termui/v3 v3.1.0 // indirect
 	github.com/google/go-github/v37 v37.0.0
@@ -24,6 +26,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/prometheus/client_golang v0.9.3 // indirect
 	github.com/pterm/pterm v0.12.29
+	github.com/rivo/tview v0.0.0-20210624165335-29d673af0ce2 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/soheilhy/cmux v0.1.4 // indirect
 	github.com/spf13/cast v1.4.0 // indirect
@@ -36,7 +39,7 @@ require (
 	github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77 // indirect
 	go.etcd.io/bbolt v1.3.2 // indirect
 	golang.org/x/oauth2 v0.0.0-20210805134026-6f1e6394065a
-	golang.org/x/sys v0.0.0-20210806184541-e5e7981a1069 // indirect
-	golang.org/x/text v0.3.6 // indirect
+	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e // indirect
+	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/resty.v1 v1.12.0 // indirect
 )

@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/mitchellh/go-homedir"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -124,69 +123,4 @@ func handleConfigCreation() {
 			log.Debug("Successfully setup new configuration")
 		}
 	}
-}
-
-func runSetup() error {
-
-	var qs = []*survey.Question{
-		{
-			Name:     "GithubUsername",
-			Prompt:   &survey.Input{Message: "Please enter your Github username"},
-			Validate: survey.Required,
-		},
-	}
-
-	answers := struct {
-		GithubUsername string
-	}{}
-
-	surveyErr := survey.Ask(qs, &answers)
-	if surveyErr != nil {
-		return surveyErr
-	}
-
-	dir, dirErr := getConfigDir()
-	if dirErr != nil {
-		return dirErr
-	}
-
-	viper.AddConfigPath(dir)
-	viper.SetConfigName(getConfigName())
-	viper.SetConfigType(getConfigExt())
-
-	configPath, configPathErr := getConfigPath()
-	if configPathErr != nil {
-		return configPathErr
-	}
-
-	viper.Set("GithubUsername", answers.GithubUsername)
-
-	_, existErr := os.Stat(configPath)
-	if !os.IsExist(existErr) {
-
-		log.WithFields(logrus.Fields{
-			"path": configPath,
-		}).Debug("Attempting to write config file to path")
-
-		if createDirErr := os.MkdirAll(dir, 0755); createDirErr != nil {
-			return createDirErr
-		}
-
-		if _, createErr := os.OpenFile(configPath, os.O_RDWR|os.O_CREATE, 0755); createErr != nil {
-			return createErr
-		}
-		log.WithFields(logrus.Fields{
-			"path": configPath,
-		}).Debug("Created new config file at path")
-	}
-
-	configWriteErr := viper.WriteConfigAs(configPath)
-
-	if configWriteErr != nil {
-		return configWriteErr
-	}
-	log.WithFields(logrus.Fields{
-		"path": configPath,
-	}).Debug("Successfully wrote config file to path")
-	return nil
 }
