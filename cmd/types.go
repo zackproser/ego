@@ -3,12 +3,14 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/go-git/go-git/v5"
 	"github.com/google/go-github/v37/github"
 )
 
 type Options struct {
 	GithubClient   *github.Client
 	GithubUsername string
+	Tally          *Tally
 }
 
 func NewOptions() *Options {
@@ -18,12 +20,16 @@ func NewOptions() *Options {
 type Configuration struct {
 	GithubUsername string
 }
-
 type SetupAnswers struct {
 	GithubUsername string
 	GitRoot        string
 }
 
+type Tally struct {
+	repos []*git.Repository
+}
+
+// Custom errors
 type GithubTokenEnvVarUnsetErr struct{}
 
 func (e GithubTokenEnvVarUnsetErr) Error() string {

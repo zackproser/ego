@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/gdamore/tcell/v2"
@@ -9,7 +10,11 @@ import (
 	"github.com/rivo/tview"
 )
 
-func renderUI(issues []*github.Issue) {
+func renderUI(issues []*github.Issue, opts *Options) {
+
+	fmt.Printf("GOT COUNT OF REPOS: %+v\n", opts.Tally.GetRepoCount())
+	os.Exit(1)
+
 	app := tview.NewApplication()
 	table := tview.NewTable().
 		SetBorders(true)

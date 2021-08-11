@@ -14,6 +14,7 @@ require (
 	github.com/gdamore/tcell/v2 v2.4.0 // indirect
 	github.com/gizak/termui v3.1.0+incompatible // indirect
 	github.com/gizak/termui/v3 v3.1.0 // indirect
+	github.com/go-git/go-git/v5 v5.4.2 // indirect
 	github.com/google/go-github/v37 v37.0.0
 	github.com/gorilla/websocket v1.4.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0 // indirect
